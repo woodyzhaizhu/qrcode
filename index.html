@@ -189,7 +189,7 @@
         // 扫码结果回调
         if (result) {
           console.log(result)
-          document.getElementById('result').textContent = decrypt(result.text)//-------------------
+          document.getElementById('result').textContent = result.text//-------------------
         }
         if (err && !(err instanceof ZXing.NotFoundException)) {
           console.error(err)
