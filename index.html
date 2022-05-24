@@ -128,6 +128,14 @@
           // reject(err);
         })
       }
+	function decrypt(word) {
+	  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
+	  var decrypt = CryptoJS.AES.decrypt(word, key, {
+		mode: CryptoJS.mode.ECB,
+		padding: CryptoJS.pad.Pkcs7
+	  });
+	  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
+	}
     })
 
     function codeReaderFn() {
@@ -202,14 +210,7 @@
       console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
     }
 	
-	function decrypt(word) {
-	  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
-	  var decrypt = CryptoJS.AES.decrypt(word, key, {
-		mode: CryptoJS.mode.ECB,
-		padding: CryptoJS.pad.Pkcs7
-	  });
-	  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
-	}
+
   </script>
 
 
