@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<!-- saved from url=(0057)https://zxing-js.github.io/library/examples/multi-camera/ -->
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="ZXing for JS">
+
+  <title>ZXing 摄像头扫码二维码及条形码</title>
+
+  <link rel="stylesheet" as="style" onload="this.rel=&#39;stylesheet&#39;;this.onload=null"
+    href="./js/index.css">
+  <link rel="stylesheet" as="style" onload="this.rel=&#39;stylesheet&#39;;this.onload=null"
+    href="./js/normalize.css">
+  <link rel="stylesheet" as="style" onload="this.rel=&#39;stylesheet&#39;;this.onload=null"
+    href="./js/milligram.min.css">
+  <style type="text/css">
+    @font-face {
+      font-family: "element-icons";
+      src: url('chrome-extension://moombeodfomdpjnpocobemoiaemednkg/fonts/element-icons.woff') format('woff'),
+        url('chrome-extension://moombeodfomdpjnpocobemoiaemednkg/fonts/element-icons.ttf ') format('truetype');
+      /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="wrapper" style="padding-top:2em">
+
+    <section class="container" id="demo-content">
+      <h1 class="title">摄像头扫码一维码及二维码 2</h1>
+      <div>
+        <a class="button" id="startButton">Start</a>
+        <a class="button" id="resetButton">Reset</a>
+      </div>
+
+      <div>
+        <!-- 摄像头预览 -->
+        <video id="video" width="300" height="200" style="border: 1px solid gray"></video>
+      </div>
+
+      <div id="sourceSelectPanel" style="display:none">
+        <label for="sourceSelect">Change video source:</label>
+        <select id="sourceSelect" style="max-width:400px">
+        </select>
+      </div>
+
+      <label>Result:</label>
+      <pre><code id="result"></code></pre>
+      <pre><code id="result2"></code></pre>
+
+    </section>
+
+  </main>
+  <script type="text/javascript" src="./crypto-js.js"></script>
+  <script type="text/javascript" src="./js/index.min.js"></script>
+  <script type="text/javascript">
+    window.addEventListener('load', function () {
+      // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
+      if (navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {};
+      }
+
+      // 一些浏览器部分支持 mediaDevices。我们不能直接给对象设置 getUserMedia
+      // 因为这样可能会覆盖已有的属性。这里我们只会在没有getUserMedia属性的时候添加它。
+      if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function (constraints) {
+
+          // 首先，如果有getUserMedia的话，就获得它
+          var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+          // 一些浏览器根本没实现它 - 那么就返回一个error到promise的reject来保持一个统一的接口
+          if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+          }
+
+          // 否则，为老的navigator.getUserMedia方法包裹一个Promise
+          return new Promise(function (resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject);
+          });
+        }
+      }
+      if (
+        navigator.mediaDevices != undefined &&
+        navigator.mediaDevices.getUserMedia != undefined
+      ) {
+        // ok, 浏览器支持它
+        const constraints = {
+          video: {
+            facingMode: "environment", //后置摄像头
+            width: {
+              min: 1280,
+              ideal: 1920,
+              max: 2560,
+            },
+            height: {
+              min: 720,
+              ideal: 1080,
+              max: 1440,
+            },
+          },
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+          const video = document.getElementById("video");
+          // video.srcObject = stream;
+          // 旧的浏览器可能没有srcObject
+          if ("srcObject" in video) {
+            video.srcObject = stream;
+
+          } else {
+            // 防止在新的浏览器里使用它，应为它已经不再支持了
+            video.src = window.URL.createObjectURL(stream);
+
+          }
+          video.onloadedmetadata = function (e) {
+            video.play();
+          };
+
+          codeReaderFn();
+
+        }).catch(err => {
+          console.log(err);
+          document.getElementById('result2').textContent = err;
+          // reject(err);
+        })
+      }
+    })
+
+    function codeReaderFn() {
+      let selectedDeviceId;
+      const codeReader = new ZXing.BrowserMultiFormatReader()
+      console.log('ZXing code reader initialized')
+      // 获取摄像头列表
+      codeReader.listVideoInputDevices()
+        .then((videoInputDevices) => {
+          const sourceSelect = document.getElementById('sourceSelect')
+
+          document.getElementById('result2').textContent = selectedDeviceId;
+          if (videoInputDevices.length >= 1) {
+            // 遍历摄像头个数
+            videoInputDevices.forEach((element) => {
+              const sourceOption = document.createElement('option')
+              sourceOption.text = element.label
+              sourceOption.value = element.deviceId
+              sourceSelect.appendChild(sourceOption)
+              if (element.label.indexOf('back') != -1) {
+                selectedDeviceId = element.deviceId;
+              } else {
+                selectedDeviceId = videoInputDevices[videoInputDevices.length - 1].deviceId
+              }
+              // document.getElementById('result2').textContent += element.label;
+            })
+            sourceSelect.onchange = () => {
+              selectedDeviceId = sourceSelect.value;
+            };
+
+            const sourceSelectPanel = document.getElementById('sourceSelectPanel')
+            sourceSelectPanel.style.display = 'block'
+            decodeFromVideoDevice(codeReader, selectedDeviceId, 'video');
+          }
+
+          // 点击按钮 开始连续扫码解析
+          document.getElementById('startButton').addEventListener('click', () => {
+            decodeFromVideoDevice(codeReader, selectedDeviceId, 'video');
+          })
+
+          // 重新配置 关闭摄像头
+          document.getElementById('resetButton').addEventListener('click', () => {
+            codeReader.reset()
+            document.getElementById('result').textContent = '';
+            console.log('Reset.')
+          })
+
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    }
+
+    function decodeFromVideoDevice(codeReader, selectedDeviceId, domId) {
+      document.getElementById('result2').textContent = domId;
+      //  selectedDeviceId选择摄像头设备 id 
+      //  video video标签id
+      codeReader.decodeFromVideoDevice(selectedDeviceId, domId, (result, err) => {
+        // 扫码结果回调
+        if (result) {
+          console.log(result)
+          document.getElementById('result').textContent = decrypt(result.text)//-------------------
+        }
+        if (err && !(err instanceof ZXing.NotFoundException)) {
+          console.error(err)
+          document.getElementById('result').textContent = err
+        }
+      })
+      console.log(`Started continous decode from camera with id ${selectedDeviceId}`)
+    }
+	
+	function decrypt(word) {
+	  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
+	  var decrypt = CryptoJS.AES.decrypt(word, key, {
+		mode: CryptoJS.mode.ECB,
+		padding: CryptoJS.pad.Pkcs7
+	  });
+	  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
+	}
+  </script>
+
+
+
+
+</body>
+
+</html>
