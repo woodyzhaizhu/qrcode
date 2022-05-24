@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>test</title>
+<!-- <script type="text/javascript" src="./chunk-vendors.f903c616.js"></script> -->
+<script type="text/javascript" src="./js/crypto-js.js"></script>
+<script type="text/javascript">
+var str={name: "翟柱", cardid: "320924198707095770", phone: "15962061086", spjob: "0"};
+var word="qMJ2LTS/cg+kEo3RCwvI+/RRNSINqpxPJKcUmVhEEqG6yZlCGNstH3p/HRKfXS/ews9quiu384sgXps5s0K6VPXJ8mFx4qwx6EasI3HEtis+DvYpWpJ/kI8R0alB7RJ6";
+var word1="HeCdbcx3COsbKjWQxBfusvRRNSINqpxPJKcUmVhEEqHr9a4Qt/qJ4+PyIMGJQTVwI3SInvcruC5rJy5SYtuTuvnSmxHe82xtol0Huc12vas+DvYpWpJ/kI8R0alB7RJ6";
+var word2="a4ZEA0c5bbUpvF6t1Rc7RHeYkQjj2TZzGzu/5VrlNFB/yHOOGcQHMeRKok8eh19UEo5q95K5B3V6E8amDdrV2Q==";
+var word3="xMPs2ErYMcX78fMLqFaUQVBSQvYpkulPSBYOvlb8GO5+YKKKsfsC133LA4uK8pw6FsP+gO1qn9jByof+20b2vSPLxPs/jy4YDuqFMDmQeHOrqqPfsJAYcDVuSbsoiUbT";
+<!-- var o = "11zoRMZvItGWU122"; -->
+// 解密
+function decrypt(word) {
+  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
+  var decrypt = CryptoJS.AES.decrypt(word, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
+}
+
+// 加密
+function encrypt(word) {
+  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
+  var word = CryptoJS.enc.Utf8.parse(word);
+  var encrypt = CryptoJS.AES.encrypt(word, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  return CryptoJS.enc.Utf8.stringify(encrypt).toString();
+}
+
+    //加密
+<!-- document.write(decrypt(word)); -->
+function decrypt(word) {
+  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
+  var decrypt = CryptoJS.AES.decrypt(word, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  });
+  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
+}
+<!-- document.write(encrypt(JSON.stringify(str))); -->
+document.write(decrypt(word));
+<!-- document.write(decrypt(word1)); -->
+<!-- document.write(decrypt(word2)); -->
+<!-- document.write(decrypt(word3)); -->
+</script>
+</head>
+<body>
+</body>
+</html>
