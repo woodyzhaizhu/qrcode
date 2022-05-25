@@ -56,7 +56,6 @@
     </section>
 
   </main>
-  <script type="text/javascript" src="./crypto-js.js"></script>
   <script type="text/javascript" src="./js/index.min.js"></script>
   <script type="text/javascript">
     window.addEventListener('load', function () {
@@ -128,14 +127,6 @@
           // reject(err);
         })
       }
-	function decrypt(word) {
-	  var key = CryptoJS.enc.Utf8.parse('11zoRMZvItGWU122');
-	  var decrypt = CryptoJS.AES.decrypt(word, key, {
-		mode: CryptoJS.mode.ECB,
-		padding: CryptoJS.pad.Pkcs7
-	  });
-	  return CryptoJS.enc.Utf8.stringify(decrypt).toString();
-	}
     })
 
     function codeReaderFn() {
@@ -197,10 +188,7 @@
         // 扫码结果回调
         if (result) {
           console.log(result)
-		  var s = decrypt(result.text);
-		  var a = s.indexOf('"name":"'); 
-		  if (a>0) {var p = s}else{var p = result.text}
-          document.getElementById('result').textContent = s        //-------------------
+          document.getElementById('result').textContent = result.text
         }
         if (err && !(err instanceof ZXing.NotFoundException)) {
           console.error(err)
