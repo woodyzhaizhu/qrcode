@@ -128,29 +128,6 @@
         })
       }
     })
-function ajax(method, url, data, success) {
-	var xhr = null;
-	try {
-		xhr = new XMLHttpRequest();
-	} catch (e) {
-		xhr = new ActiveXObject('Microsoft.XMLHTTP');
-	}	
-	if (method == 'get' && data) {url += '?' + data;}
-	xhr.open(method,url,true);
-	if (method == 'get') {
-		xhr.send();
-	} else {
-		xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
-		xhr.send(data);
-	}
-	xhr.onreadystatechange = function() {
-	if ( xhr.readyState == 4 && xhr.status == 200 ) {			
-				success && success(xhr.responseText);
-			// } else {
-				// alert('出错了,Err：' + xhr.status);
-			}		
-	}
-}
 
     function codeReaderFn() {
       let selectedDeviceId;
@@ -210,13 +187,8 @@ function ajax(method, url, data, success) {
       codeReader.decodeFromVideoDevice(selectedDeviceId, domId, (result, err) => {
         // 扫码结果回调
         if (result) {
-          console.log(result)
-	  ajax('post','http://woodyzhai.eicp.net/qrcode',result.text,function(data) {
-		var d = JSON.parse(data);
-		      document.getElementById('result').textContent = result.text
-		}			
-	  },);		
-          
+          console.log(result);
+	  document.getElementById('result').textContent = result.text	
         }
         if (err && !(err instanceof ZXing.NotFoundException)) {
           console.error(err)
